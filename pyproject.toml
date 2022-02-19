@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "pysqljobber"
+version = "0.0.1"
+description = ""
+authors = ["dchatterjee172 <dchatterjee172@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.7,<=3.10"
+fastapi = "^0.74.0"
+rich-click = "^1.0.0"
+pydantic = "^1.9.0"
+uvicorn = "^0.17.5"
+toml = "^0.10.2"
+aioredis = "^2.0.1"
+uvloop = "^0.16.0"
+psycopg = {extras = ["binary"], version = "^3.0.10"}
+psycopg-pool = "^3.1.1"
+rich = "^12.5.1"
+
+[tool.poetry.dev-dependencies]
+pre-commit = "2.16.0"
+aiohttp = {extras = ["speedups"], version = "^3.8.3"}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+safe = true
+target_version = ["py37", "py38", "py39", "py310"]
+
+[tool.isort]
+profile = "black"
+
+[tool.poetry.plugins."console_scripts"]
+pysqljobber = "pysqljobber.cli:cli"

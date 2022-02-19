@@ -1,0 +1,19 @@
+[task_queue]
+broker_url = "redis://redis"
+result_backend_url = "redis://redis"
+
+[result_db]
+
+[result_db.db1]
+dsn = "postgresql://test:test@cache-db/result_db"
+
+[result_db.db2]
+dsn = "postgresql://test:test@cache-db/result_db"
+
+[compute_db]
+
+[compute_db.db1]
+dsn = "postgresql://test:test@compute-db/compute_db"
+
+[compute_db.db2]
+dsn = "postgresql://test:test@compute-db/another_compute_db"

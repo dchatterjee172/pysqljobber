@@ -1,0 +1,55 @@
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+  redis-insight:
+    image: redislabs/redisinsight
+    ports:
+      - 8001:8001
+    depends_on:
+      - redis
+  compute-db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+    ports:
+      - 5432:5432
+    volumes:
+      - ./init_compute_db.sql:/docker-entrypoint-initdb.d/init_compute_db.sql:ro
+  cache-db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: result_db
+    ports:
+      - 5431:5432
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    depends_on:
+      - compute-db
+      - cache-db
+  pysqljobber-api:
+    build:
+      context: ..
+    volumes:
+      - ./:/example:ro
+    ports:
+      - 8000:8000
+    command: --debug api-server --config-file example/config_file.toml --host 0.0.0.0
+    depends_on:
+      - redis
+  pysqljobber-worker:
+    build:
+      context: ..
+    volumes:
+      - ./:/example:ro
+    command: worker --sql-dir example/sql_dir/ --config-file example/config_file.toml
+    depends_on:
+      - compute-db
+      - cache-db
+      - pysqljobber-api

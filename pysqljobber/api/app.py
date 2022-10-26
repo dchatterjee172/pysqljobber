@@ -2,7 +2,7 @@ import typing
 import uuid
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response, status
 
 from pysqljobber.config_file import Config
 from pysqljobber.job_queue import JobQueue
@@ -25,7 +25,9 @@ def get_job_queue() -> JobQueue:
     response_model=schema.CreateJobResponse,
 )
 async def create_job(
-    job: schema.CreateJobRequest, job_queue: JobQueue = Depends(get_job_queue)
+    job: schema.CreateJobRequest,
+    response: Response,
+    job_queue: JobQueue = Depends(get_job_queue),
 ):
     job_id = job.job_id if job.job_id is not None else uuid.uuid4().hex
     is_queued = await job_queue.enqueue_job(
@@ -34,6 +36,7 @@ async def create_job(
         queue_name=job.queue_name,
         job_args=job.job_args,
     )
+    response.status_code = status.HTTP_201_CREATED if is_queued else status.HTTP_200_OK
     return schema.CreateJobResponse(job_id=job_id, is_queued=is_queued)
 
 

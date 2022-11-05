@@ -1,0 +1,41 @@
+- task_name: get_1
+  result_db: postgresql://test:test@cache-db-2/result_db
+  expected_result:
+    - result: 1
+- task_name: get_1_with_job_id
+  job_id: 123abc
+  result_db: postgresql://test:test@cache-db-2/result_db
+  expected_result:
+    - result: 1
+- task_name: get_a
+  result_db: postgresql://test:test@cache-db-1/result_db
+  expected_result:
+    - result: "a"
+- task_name: get_true
+  result_db: postgresql://test:test@cache-db-2/result_db
+  expected_result:
+    - result: true
+- task_name: get_2_2
+  result_db: postgresql://test:test@cache-db-1/result_db
+  expected_result:
+    - result: 2.2
+- task_name: get_multi_row
+  result_db: postgresql://test:test@cache-db-2/result_db
+  expected_result:
+    - result: 1
+    - result: 2
+    - result: 3
+- task_name: with_job_args
+  result_db: postgresql://test:test@cache-db-1/result_db
+  job_args:
+    arg: a
+  expected_result:
+    - result: a
+- task_name: sleep_db1
+  result_db: postgresql://test:test@cache-db-2/result_db
+  expected_result:
+    - result: a
+- task_name: sleep_db2
+  result_db: postgresql://test:test@cache-db-1/result_db
+  expected_result:
+    - result: a

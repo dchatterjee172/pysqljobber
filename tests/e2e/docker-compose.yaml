@@ -1,0 +1,79 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:alpine
+  redis-insight:
+    image: redislabs/redisinsight
+    ports:
+      - 8001:8001
+    depends_on:
+      - redis
+  compute-db-1:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: compute_db
+  compute-db-2:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: compute_db
+  cache-db-1:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: result_db
+  cache-db-2:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: result_db
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    depends_on:
+      - compute-db-1
+      - compute-db-2
+      - cache-db-1
+      - cache-db-2
+  pysqljobber-api:
+    build:
+      context: ../..
+    volumes:
+      - ./:/example:ro
+    mem_limit: 256M
+    mem_reservation: 128M
+    deploy:
+      replicas: 2
+    command: --debug api-server --config-file example/config_file.toml --host 0.0.0.0
+    depends_on:
+      - redis
+  caddy:
+    image: caddy
+    ports:
+      - 8000:8000
+    command: |
+      caddy reverse-proxy --from :8000 --to http://pysqljobber-api:8000
+    depends_on:
+      - pysqljobber-api
+  pysqljobber-worker:
+    build:
+      context: ../..
+    volumes:
+      - ./:/example:ro
+    command: --debug worker --concurrency 10 --sql-dir example/sql_dir/ --config-file example/config_file.toml
+    depends_on:
+      - compute-db-1
+      - compute-db-2
+      - cache-db-1
+      - cache-db-2
+      - pysqljobber-api
+    mem_limit: 256M
+    mem_reservation: 128M
+    deploy:
+      replicas: 2
